@@ -1,0 +1,40 @@
+module sfr04(clk,echopulse,D,trigger);
+input clk;
+input echopulse;
+output reg [15:0]D=0;
+output reg trigger=0;
+reg enc_read=0;
+reg [10:0]dem=0;
+reg [15:0]temp=0;
+reg pre_echopulse;
+always @(posedge clk) begin
+		pre_echopulse<=echopulse;
+		if (dem==1) trigger=1;
+		else if (dem==11) 
+			begin 
+			trigger=0;
+			enc_read=1;
+			end
+		else if (dem==1001) 
+			begin
+			dem=0;
+			enc_read=0;
+			end
+		if (enc_read==1)
+			begin
+				if ((pre_echopulse|echopulse)==1) 
+					begin
+					temp=temp+1;
+					if (temp>=16'hffff) temp=16'hffff;
+					end
+				if ({pre_echopulse,echopulse}==2'b10)
+					begin
+						D=temp;
+						temp=0;
+					end
+			end
+		dem=dem+1;
+		end
+endmodule 
+				
+				
